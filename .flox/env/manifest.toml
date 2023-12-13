@@ -3,22 +3,26 @@ python3 = {}
 
 [hook]
 script = """
+	# just in case we didn't do this when we checked out
+	echo; echo "Updating submodules"
+	git submodule update --init
+
+	# a virtual python inside a virtual python
         if [ ! -d venv ]; then
                 echo "Creating virtual environment"
                 python -m venv venv
         fi
 
-	echo; echo "Updating submodules"
-	git submodule update --init
-
         echo; echo "Activating virtual environment"
         . venv/bin/activate
 
+	# need the nightly pytorch for macos
         echo; echo "Installing / updating packages"
-        pip3 -qq install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+        pip3 -qq install --pre torch torchvision torchaudio \
+		--extra-index-url https://download.pytorch.org/whl/nightly/cpu
         pip3 -qq install -r requirements.txt
-        pip3 -qq install opencv-python
 
+	# if we actually ran the interface here, we'd never see its output
 	echo; echo "All set, type 'start' to run the interface"
 	alias start="python main.py"
 """
