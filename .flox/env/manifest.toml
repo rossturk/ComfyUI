@@ -1,0 +1,24 @@
+[install]
+python3 = {}
+
+[hook]
+script = """
+        if [ ! -d venv ]; then
+                echo "Creating virtual environment"
+                python -m venv venv
+        fi
+
+	echo; echo "Updating submodules"
+	git submodule update --init
+
+        echo; echo "Activating virtual environment"
+        . venv/bin/activate
+
+        echo; echo "Installing / updating packages"
+        pip3 -qq install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+        pip3 -qq install -r requirements.txt
+        pip3 -qq install opencv-python
+
+	echo; echo "All set, type 'start' to run the interface"
+	alias start="python main.py"
+"""
