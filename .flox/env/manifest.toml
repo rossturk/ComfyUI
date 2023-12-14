@@ -3,26 +3,69 @@ python3 = {}
 
 [hook]
 script = """
-	# just in case we didn't do this when we checked out
-	echo; echo "Updating submodules"
 	git submodule update --init
 
-	# a virtual python inside a virtual python
+	# Virtual environments
+	#
+	# we should not have to do this, flox should set
+	# up Python so that pip installs packages into
+	# a directory inside ~/.flox/run/ by default
+	#
+	# why have a virtual python environment inside
+	# a flox environment? we've already got plenty
+	# of filesystem isolation and path management
+	# to go around
+
         if [ ! -d venv ]; then
                 echo "Creating virtual environment"
                 python -m venv venv
         fi
-
         echo; echo "Activating virtual environment"
         . venv/bin/activate
 
-	# need the nightly pytorch for macos
-        echo; echo "Installing / updating packages"
+
+	# Specialized package handling
+	#
+	# in this situation we need a very specific
+	# version of pytorch - only the nightly builds
+	# contain hardware support for M1/M2 macs now
+	#
+	# there should be a way for me to do this from
+	# the flox manifest.
+
         pip3 -qq install --pre torch torchvision torchaudio \
-		--extra-index-url https://download.pytorch.org/whl/nightly/cpu
+	  --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+
+
+	# Standard package handling
+	#
+	# we should not have to do this either! if there
+	# is a requirements.txt, the packages inside it
+	# should be installed into the flox environment
+	# when 'flox init' is run
+	#
+	# sometimes this has a suffix like requirements-foo.txt
+	# so 'flox init' should make some effort to look
+	# for it and load the manifest with its alternate
+	# location. the name is mere convention.
+	#
+	# we should consider also running this every time
+	# the environment is activated...or at least notify
+	# users when it needs to be run by them manually
+
         pip3 -qq install -r requirements.txt
 
-	# if we actually ran the interface here, we'd never see its output
+
+	# Running the service
+	#
+	# I was really, really, really tempted to just run
+	# the service here, but that means every time I
+	# need to tweak something I have to come in here
+	# and disable it so I can get a "dev shell"
+	#
+	# this solution works until we have service mgmt
+
 	echo; echo "All set, type 'start' to run the interface"
 	alias start="python main.py"
+
 """
