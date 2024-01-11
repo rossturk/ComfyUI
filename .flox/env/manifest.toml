@@ -1,0 +1,23 @@
+[install]
+python3 = {}
+
+[hook]
+script = """
+	git submodule update --init
+
+        if [ ! -d venv ]; then
+                echo "Creating virtual environment"
+                python -m venv venv
+        fi
+        echo; echo "Activating virtual environment"
+        . venv/bin/activate
+
+
+        pip3 -qq install --pre torch torchvision torchaudio \
+	  --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+
+        pip3 -qq install -r requirements.txt
+
+	echo; echo "All set, type 'start' to run the interface"
+	alias start="python main.py"
+"""
